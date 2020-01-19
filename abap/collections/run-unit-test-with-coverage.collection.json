@@ -1,0 +1,80 @@
+{
+	"variables": [],
+	"info": {
+		"name": "run-unit-test-with-coverage",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "UT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var oJsonObject, oResult, oCoverage,",
+							"    sUri = \"\";",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"",
+							"if (responseCode.code === 200) {",
+							"    oJsonObject  = xml2Json(responseBody);",
+							"    ",
+							"    tests[\"Result data is present\"] = oJsonObject[\"aunit:runResult\"];",
+							"    oResult = oJsonObject[\"aunit:runResult\"];",
+							"",
+							"    tests[\"Coverage data is present\"] = isContentValid(oResult[\"external\"][\"coverage\"]);    ",
+							"    oCoverage = oResult[\"external\"][\"coverage\"]",
+							"",
+							"    sUri = getNodeValue(oCoverage, \"adtcore:uri\");",
+							"    ",
+							"    tests[\"Measurement Uri is present\"] = sUri;",
+							"    postman.setGlobalVariable(\"measurementUri\", sUri);",
+							"}",
+							"",
+							"function isContentValid(oJsonObject) {",
+							"    if (oJsonObject) {",
+							"        return true;",
+							"    } else {",
+							"        return false;",
+							"    }",
+							"}",
+							"",
+							"function getNodeValue(oNode, name) {",
+							"    if (oNode.$[name]) {",
+							"        return oNode.$[name];",
+							"    } else {",
+							"        return \"\";",
+							"    }",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{protocol}}{{host}}/sap/bc/adt/abapunit/testruns",
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-csrf-token",
+						"value": "{{x-csrf-token}}",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/xml",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<aunit:runConfiguration xmlns:aunit=\"http://www.sap.com/adt/aunit\">\r\n\t<external>\r\n\t\t<coverage active=\"true\"/>\r\n\t</external>\r\n\t<options>\r\n\t\t<uriType value=\"semantic\"/>\r\n\t\t<testDeterminationStrategy appendAssignedTestsPreview=\"true\" assignedTests=\"false\" sameProgram=\"true\"/>\r\n\t\t<testRiskLevels critical=\"true\" dangerous=\"true\" harmless=\"true\"/>\r\n\t\t<testDurations long=\"true\" medium=\"true\" short=\"true\"/>\r\n\t\t<withNavigationUri enabled=\"false\"/>\r\n\t</options>\r\n\t<adtcore:objectSets xmlns:adtcore=\"http://www.sap.com/adt/core\">\r\n\t\t<objectSet kind=\"inclusive\">\r\n\t\t\t<adtcore:objectReferences>\r\n\t\t\t\t<adtcore:objectReference adtcore:uri=\"/sap/bc/adt/packages/z-lac\"/>\r\n\t\t\t</adtcore:objectReferences>\r\n\t\t</objectSet>\r\n\t</adtcore:objectSets>\r\n</aunit:runConfiguration>"
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
