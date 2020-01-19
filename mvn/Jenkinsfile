@@ -1,0 +1,87 @@
+def project_path = ""
+def target_path = "target"
+
+node {
+
+    notify("Started")
+
+    try {
+
+        // checkout repo locally
+        stage('checkout') {
+            // clean dir
+            deleteDir()
+            // clone repo
+            git 'https://github.com/afuscella/HelloWorldServletOAuth2.git'
+        }
+    
+        // move to dir
+        dir("") {
+            
+            // jacoco
+            stage('verify') {
+                sh 'mvn clean verify'
+            }
+    
+            // unit test
+            stage('tests') {
+                sh 'mvn test'
+            }
+    
+            // generate .class        
+            stage('mvn compile') {
+                sh 'mvn compile'
+            }
+    
+            // generate .jar            
+            stage('mvn package') {
+                sh 'mvn package'
+            }
+    
+            // do all steps above except tests
+            stage('mvn install (no tests)') {
+                sh 'mvn install -DskipTests'
+            }
+    
+            // archive the generated *.jar file 
+            stage('archive') {
+                step([
+                    $class: 'ArtifactArchiver', 
+                    artifacts: "${target_path}/*.?ar",
+                    excludes: null
+                ])
+            }
+        }
+    
+    // error handling
+    } catch (err) {
+        notify("Failed ${err}")
+        currentBuild.result = 'FAILURE'
+    }
+    
+    // publish jacoco report
+    publishHTML([
+        allowMissing: false, 
+        alwaysLinkToLastBuild: false, 
+        keepAll: false, 
+        reportDir: 'target/site/jacoco',
+        reportFiles: 'index.html',
+        reportName: 'Code Coverage Report',
+        reportTitles: ''
+    ])
+    
+    // store JUnit tests
+    step([
+        $class: 'JUnitResultArchiver', 
+        testResults: 'target/surefire-reports/TEST-*.xml'
+    ])
+}
+
+def notify(status){
+    emailext (
+      to: "your@email.com",
+      subject: "${status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+      body: """<p>${status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+        <p>Check console output at <a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a></p>""",
+    )
+}
