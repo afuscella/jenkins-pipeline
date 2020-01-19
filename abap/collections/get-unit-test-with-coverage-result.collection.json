@@ -1,0 +1,46 @@
+{
+	"variables": [],
+	"info": {
+		"name": "get-unit-test-with-coverage-result",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "UT result",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{protocol}}{{host}}{{measurementUri}}",
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-csrf-token",
+						"value": "{{x-csrf-token}}",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/xml",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<cov:query xmlns:adtcore=\"http://www.sap.com/adt/core\" xmlns:cov=\"http://www.sap.com/adt/cov\">\r\n\t<adtcore:objectSets xmlns:adtcore=\"http://www.sap.com/adt/core\">\r\n\t\t<objectSet kind=\"inclusive\">\r\n\t\t\t<adtcore:objectReferences>\r\n\t\t\t\t<adtcore:objectReference adtcore:uri=\"/sap/bc/adt/repository/informationsystem/virtualfolders?selection=package%3az-lac\"/>\r\n\t\t\t</adtcore:objectReferences>\r\n\t\t</objectSet>\r\n\t</adtcore:objectSets>\r\n</cov:query>"
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

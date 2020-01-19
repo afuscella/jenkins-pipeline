@@ -1,0 +1,25 @@
+{
+  "id": "539600d3-2f91-d58d-aae0-81e95f24543c",
+  "name": "NPL",
+  "values": [
+    {
+      "enabled": true,
+      "key": "host",
+      "value": "",
+      "type": "text"
+    },
+    {
+      "enabled": true,
+      "key": "protocol",
+      "value": "https://",
+      "type": "text"
+    },
+    {
+      "enabled": true,
+      "key": "basicAuth",
+      "value": "",
+      "type": "text"
+    }
+  ],
+  "timestamp": 1579475991476
+}

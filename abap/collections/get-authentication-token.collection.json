@@ -1,0 +1,79 @@
+{
+	"variables": [],
+	"info": {
+		"name": "get-authentication-token",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get token CSRF token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var sToken = postman.getResponseHeader(\"x-csrf-token\");",
+							"",
+							"if (sToken) {",
+							"    postman.setGlobalVariable(\"x-csrf-token\", sToken);",
+							"    tests[\"x-csrf-token is present\"] = postman.getResponseHeader(\"x-csrf-token\");",
+							"",
+							"} else {",
+							"    postman.setNextRequest(null);",
+							"    tests[\"x-csrf-token is not present\"] = false;",
+							"    ",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "{{protocol}}{{host}}/sap/bc/adt/abapunit?sap-client=001&sap-language=EN",
+					"host": [
+						"{{protocol}}{{host}}"
+					],
+					"path": [
+						"sap",
+						"bc",
+						"adt",
+						"abapunit"
+					],
+					"query": [
+						{
+							"key": "sap-client",
+							"value": "001",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "sap-language",
+							"value": "EN",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "HEAD",
+				"header": [
+					{
+						"key": "x-csrf-token",
+						"value": "fetch",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "{{basicAuth}}",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": "Every single request comming from outside system requires an authorization token.\n\n1. Inform your user credentials in Authorization tab;\n2. Update headers;\n3. Push send button, the token is located in response header under name `x-csrf-token`;\n4. Token is automatically added to the environment variables scope."
+			},
+			"response": []
+		}
+	]
+}
