@@ -2,7 +2,9 @@ def project_path = ""
 def target_path = "target"
 
 node {
-
+	
+	checkout scm
+	
     notify("Started")
 
     try {
