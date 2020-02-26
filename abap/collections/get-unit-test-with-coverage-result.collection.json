@@ -2,6 +2,7 @@
 	"variables": [],
 	"info": {
 		"name": "get-unit-test-with-coverage-result",
+		"_postman_id": "604d03e1-8674-b619-cd91-3fed3cf4793a",
 		"description": "",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
@@ -14,13 +15,13 @@
 					"script": {
 						"type": "text/javascript",
 						"exec": [
-							"tests[\"Status code is 200\"] = responseCode.code === 200;"
+							"tests[\"Status code is \" + responseCode.code] = responseCode.code === 200;"
 						]
 					}
 				}
 			],
 			"request": {
-				"url": "{{protocol}}{{host}}{{measurementUri}}",
+				"url": "{{protocol}}{{host}}{{measurementURI}}",
 				"method": "POST",
 				"header": [
 					{
@@ -31,6 +32,11 @@
 					{
 						"key": "Content-Type",
 						"value": "application/xml",
+						"description": ""
+					},
+					{
+						"key": "Cookie",
+						"value": "sap-usercontext={{sap-usercontext}}; SAP_SESSIONID_NPL_001={{SAP_SESSIONID_NPL_001}}; SAP_SESSIONID_NPL_001={{SAP_SESSIONID_NPL_001}}",
 						"description": ""
 					}
 				],
