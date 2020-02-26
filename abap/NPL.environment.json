@@ -5,7 +5,7 @@
     {
       "enabled": true,
       "key": "host",
-      "value": "",
+      "value": "7a3ca342.sa.ngrok.io",
       "type": "text"
     },
     {
@@ -17,7 +17,7 @@
     {
       "enabled": true,
       "key": "basicAuth",
-      "value": "",
+      "value": "Basic REVWRUxPUEVSOkRvd24xb2Fk",
       "type": "text"
     }
   ],

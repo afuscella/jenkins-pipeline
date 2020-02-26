@@ -1,0 +1,126 @@
+node {
+
+    def icon = ""
+	def result
+
+	checkout scm
+
+    try {
+        // checkout repo locally
+        stage('checkout changes from PR') {
+	    git 'https://github.com/afuscella/HelloWorldServletOAuth2.git'
+
+            // set commit status
+            step([$class: 'GitHubCommitStatusSetter', 
+                contextSource: [
+                    $class: 'ManuallyEnteredCommitContextSource',
+                    context: 'ci/jenkins-' + currentBuild.displayName
+                ], 
+                statusResultSource: [
+                    $class: 'ConditionalStatusResultSource', 
+                    results: []
+                ]
+            ])
+        }
+    
+        // delete current dir before running tests
+        deleteDir()
+        
+        // clone pipeline rules
+        sh "git clone https://github.com/afuscella/jenkins-pipeline-pvt.git ." 
+    
+        // switch to 'abap' folder
+        dir('abap') {
+
+            stage('get token') {
+                sh "newman run collections/get-authentication-token.collection.json " +
+                  "-e NPL.environment.json " +
+                  "-r cli,junit " +
+                  "--insecure " +
+                  "--export-environment NPL.environment.json " +
+                  "--export-globals globals.json"
+            }
+            
+            stage('unit test with coverage') {
+                sh "newman run collections/run-unit-test-with-coverage.collection.json " +
+                  "-e NPL.environment.json " +
+                  "-r cli,junit " +
+                  "--insecure " +
+                  "--globals globals.json " +
+                  "--reporter-junit-export " +
+                  "--export-globals globals.json"
+            }
+            
+            stage('collect unit test results') {
+                sh "newman run collections/get-unit-test-with-coverage-result.collection.json " +
+                  "-e NPL.environment.json " +
+                  "-r cli,junit " +
+                  "--insecure " +
+                  "--reporter-junit-export " +
+                  "--globals globals.json"
+            }
+        }
+
+        result = 'SUCCESS'
+        icon   = "completed.gif"
+            
+    // error handling
+    } catch (err) {
+        notify("Failed ${err}")
+        
+        result = 'FAILURE'
+        icon   = "delete.gif"
+    }
+
+    step([
+        $class: 'GitHubCommitStatusSetter', 
+        contextSource: [
+            $class: 'ManuallyEnteredCommitContextSource', 
+            context: 'ci/jenkins-' + currentBuild.displayName
+        ], 
+        errorHandlers: [
+            [
+                $class: 'ChangingBuildStatusErrorHandler', 
+                result: 'FAILURE'
+            ]
+        ], 
+        statusResultSource: [
+            $class: 'ConditionalStatusResultSource', 
+            results: [
+                [
+                    $class: 'BetterThanOrEqualBuildResult', 
+                    message: 'Build finished successfully',
+                    result: 'SUCCESS',
+                    state: 'SUCCESS']
+                    ]
+                ]
+        ])
+
+	collectTestResults()
+
+    addBadge(icon: icon)
+
+	currentBuild.result = result
+}
+
+def collectTestResults() {
+	try {
+		dir('abap') {
+			step([
+				$class: 'JUnitResultArchiver', 
+				testResults: 'newman/*.xml'
+			])
+		}
+	} catch (err) {
+		echo ${err}
+	}
+}
+
+def notify(status){
+    emailext (
+      to: "your@email.com",
+      subject: "${status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+      body: """<p>${status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+        <p>Check console output at <a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a></p>""",
+    )
+}
